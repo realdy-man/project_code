@@ -1,0 +1,54 @@
+# 虚拟环境
+.venv/
+*.pyc
+__pycache__/
+
+# 日志文件
+*.log
+logs/
+
+# 数据文件
+data/
+*.csv
+*.txt
+output_*.csv
+test_texts.txt
+
+# Nacos相关
+nacos-server-*/
+nacos-sdk-python-*/
+
+# Docker相关
+Dockerfile
+*.md
+
+# 临时文件
+tmp/
+*.zip
+*.rar
+*.7z
+services/*-temp/
+
+# IDE配置
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 其他
+.env
+*.pkl
+*.pth
+*.pt
+*.db
+*.sqlite
+*.exe
+*.dll
+*.lib
+
+# 第三方库
+alipay-sdk-python/
+local_packages/
+
+# 子模块相关
+.gitmodules

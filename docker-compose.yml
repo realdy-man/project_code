@@ -1,0 +1,81 @@
+services:
+
+  service-a:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SERVICE_DIR=services/service-a
+    ports:
+      - "5000:5000"
+    networks:
+      - microservices-network
+    environment:
+      - SERVICE_NAME=service-a
+      - SERVICE_PORT=5000
+      - NACOS_SERVER_ADDR=host.docker.internal:8848
+
+  service-b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SERVICE_DIR=services/service-b
+    ports:
+      - "5001:5001"
+    networks:
+      - microservices-network
+    environment:
+      - SERVICE_NAME=service-b
+      - SERVICE_PORT=5001
+      - NACOS_SERVER_ADDR=host.docker.internal:8848
+
+  service-c:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SERVICE_DIR=services/service-c
+    container_name: service-c
+    ports:
+      - "5002:5002"
+    networks:
+      - microservices-network
+    environment:
+      - SERVICE_NAME=service-c
+      - SERVICE_PORT=5002
+      - NACOS_SERVER_ADDR=host.docker.internal:8848
+      - NACOS_NAMESPACE=
+      - REGISTER_IP=127.0.0.1
+    restart: unless-stopped
+    volumes:
+      - ./services/service-c/app.py:/app/app.py
+      - ./services/service-c/requirements.txt:/app/requirements.txt
+
+  service-d:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - SERVICE_DIR=services/service-d
+    ports:
+      - "5003:5003"
+    networks:
+      - microservices-network
+    environment:
+      - SERVICE_NAME=service-d
+      - SERVICE_PORT=5003
+      - NACOS_SERVER_ADDR=host.docker.internal:8848
+      - NACOS_NAMESPACE=
+      - REGISTER_IP=127.0.0.1
+      - TZ=Asia/Shanghai
+    restart: unless-stopped
+    volumes:
+      - ./services/service-d/tmp:/app/tmp
+      - ./services/service-d/models:/app/models
+      - ./services/service-d/model_training.db:/app/model_training.db
+
+networks:
+  microservices-network:
+    driver: bridge
+
