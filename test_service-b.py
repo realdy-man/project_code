@@ -5,7 +5,9 @@ import sys
 
 # 配置
 FILE_PATH = r'f:\AAA_JIQIXUEXI\project_code\test_texts.txt'  # 使用原始字符串避免反斜杠转义问题
-SERVICE_B_URL = 'http://localhost:5001/generate_dataset_from_file'
+# 通过网关连接service-b服务
+GATEWAY_URL = 'http://localhost:8080'  # 网关地址（与test_service-a.py中使用的保持一致）
+SERVICE_B_URL = f'{GATEWAY_URL}/api/service-b/generate_dataset_from_file'
 OUTPUT_CSV = 'output_final.csv'
 
 def main():

@@ -10,6 +10,11 @@ import json
 import csv
 import io
 import random
+import logging
+
+# 配置日志
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # 加载环境变量
 load_dotenv()
@@ -206,9 +211,15 @@ def generate_dataset_from_file():
         # 获取service-a的URL
         service_a_url = request.form.get('service_a_url')
         
-        # 无论是否提供service_a_url，都强制使用网关地址
-        gateway_url = 'http://host.docker.internal:9878'  # 使用host.docker.internal访问宿主机上的网关
+        # 始终通过网关连接service-a
+        # 使用环境变量或默认值(host.docker.internal适用于Docker Desktop，172.17.0.1是Linux Docker默认网关)
+        gateway_host = os.environ.get('GATEWAY_HOST', 'host.docker.internal')
+        gateway_port = os.environ.get('GATEWAY_PORT', '8080')
+        gateway_url = f'http://{gateway_host}:{gateway_port}'
         service_a_url = f'{gateway_url}/api/service-a/predict_text'
+        
+        # 记录实际使用的service_a_url
+        logger.debug(f"Using service_a_url: {service_a_url}")
         
         # 创建CSV文件
         output = io.StringIO()
@@ -219,21 +230,26 @@ def generate_dataset_from_file():
         for text in texts:
             # 调用service-a的预测API
             try:
+                print(f"Calling gateway at {service_a_url} with text: {text}")
                 response = requests.post(
                     service_a_url,
                     json={'text': text},
                     headers={'Content-Type': 'application/json'},
                     timeout=10  # 添加超时设置
                 )
+                print(f"Gateway response status: {response.status_code}")
+                print(f"Gateway response content: {response.text}")
                 if response.status_code == 200:
                     result = response.json()
+                    print(f"Gateway response JSON: {result}")
                     if result.get('success'):
-                        label = result.get('prediction_label', '')
+                        label = result.get('prediction_name', '')
                     else:
                         label = 'error'
                 else:
                     label = 'error'
             except Exception as e:
+                print(f"Error calling gateway: {e}")
                 label = 'error'
             
             # 写入CSV
@@ -290,17 +306,12 @@ def generate_dataset():
         # 获取service-a的URL
         service_a_url = data.get('service_a_url')
         
-        # 如果没有提供service_a_url或只提供了路径部分，则使用服务发现
-        if not service_a_url or (service_a_url and service_a_url.startswith('/')):
-            # 通过Nacos服务发现获取service-a的URL
-            service_a_base_url = get_service_instance_url('service-a')
-            if service_a_base_url:
-                # 如果只提供了路径部分，则拼接完整URL
-                path = service_a_url if (service_a_url and service_a_url.startswith('/')) else '/predict_text'
-                service_a_url = f"{service_a_base_url}{path}"
-            else:
-                # 如果服务发现失败，使用默认值（使用服务名访问，支持Docker网络）
-                service_a_url = 'http://service-a:5000/predict_text'
+        # 始终通过网关连接service-a
+        # 使用环境变量或默认值(host.docker.internal适用于Docker Desktop，172.17.0.1是Linux Docker默认网关)
+        gateway_host = os.environ.get('GATEWAY_HOST', 'host.docker.internal')
+        gateway_port = os.environ.get('GATEWAY_PORT', '8080')
+        gateway_url = f'http://{gateway_host}:{gateway_port}'
+        service_a_url = f'{gateway_url}/api/service-a/predict_text'
         
         # 创建CSV文件
         output = io.StringIO()

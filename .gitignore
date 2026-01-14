@@ -9,6 +9,8 @@ logs/
 
 # 数据文件
 data/
+tools/data/
+tools/dict/
 *.csv
 *.txt
 output_*.csv
@@ -24,6 +26,7 @@ Dockerfile
 
 # 临时文件
 tmp/
+services/*/tmp/
 *.zip
 *.rar
 *.7z
@@ -35,11 +38,16 @@ services/*-temp/
 *.swp
 *.swo
 
-# 其他
-.env
+# 模型文件
 *.pkl
 *.pth
 *.pt
+*.pb
+models/
+services/*/models/
+
+# 其他
+.env
 *.db
 *.sqlite
 *.exe
